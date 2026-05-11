@@ -1,0 +1,26 @@
+#include <lpc214x.h>
+
+// Simple delay
+void delay(unsigned int d)
+{
+    unsigned int i, j;
+    for(i = 0; i < d; i++)
+        for(j = 0; j < 500; j++);
+}
+
+int main(void)
+{
+    // Select P0.25 as DAC output (AOUT)
+    PINSEL1 |= (1 << 19);
+
+    while(1)
+    {
+        // HIGH (approx Vref)
+        DACR = (1023 << 6);
+        delay(50);
+
+        // LOW (0V)
+        DACR = (0 << 6);
+        delay(50);
+    }
+}
