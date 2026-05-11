@@ -1,0 +1,58 @@
+unsigned int echo_time;
+  	float distance;
+  	unsigned char buf[16];
+
+  	/* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+
+    /* Initialize all configured peripherals */
+    //TRIG PB0
+    //ECHO PC4
+    //Initialize the clocks for the timer6 and ports pins PB1 and PC5
+    RCC->AHB1ENR |= (0x01); //GPIOB
+    RCC->AHB1ENR |= (0x02); //GPIOC
+    RCC->APB1ENR |= (1 << 4); //timer6
+
+    //Initialize the TRIG and ECHO Pins
+    GPIOB->MODER |= (1 << 2); //PB1 TRIG pin as output
+    GPIOC->MODER &= ~(3 << 10); //PC5 ECHO pin as input
+
+    TIM6->PSC =16; //16MHz /16 1 us counting
+    TIM6->CR1 |= 1<<0; //enable timer
+
+
+    HAL_Delay(100);
+    /* Infinite loop */
+    /* USER CODE BEGIN WHILE */
+    while (1)
+    {
+  	  while(((GPIOC->IDR) & (1 << 5)));//wait till echo pin HIGH
+  	  HAL_Delay(10);
+
+  	  GPIOB->ODR |= (1 << 1); //TRIG PIN HIGH
+
+  	  TIM6->CNT = 0 ;//start counting from 0
+  	  while((TIM6->CNT) < 12); //wait for delay of 20 us
+
+  	  GPIOB->ODR &= ~(1 << 1); //TRIG PIN LOW
+
+  	  while(((GPIOC->IDR) & (1 << 5)) == 0);//wait for echo pin to go HIGH
+
+  	  TIM6->CNT = 0 ;//start counting timer from 0
+  	  while(((GPIOC->IDR) & (1 << 5)));//wait till ECHO pin goes LOW
+  	  echo_time = TIM6->CNT; //get the count in us
+
+  	  if(echo_time >= 38000)
+  	   {
+
+  	   }
+  	  else
+  	   {
+  	    distance = (float)(echo_time*0.034)/2;
+  		if(distance < 20)
+  			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_2, GPIO_PIN_SET);
+  		else
+  			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_2, GPIO_PIN_RESET);
+
+  	   }
+
+    }

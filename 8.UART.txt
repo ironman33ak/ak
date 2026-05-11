@@ -1,0 +1,16 @@
+UART 
+
+
+
+//SystemClock_Config();
+
+
+uint8_t ch;
+
+
+while(1) {
+
+	HAL_UART_Receive(&huart3, &ch, 1, HAL_MAX_DELAY);
+        HAL_UART_Transmit(&huart3, &ch, 1, HAL_MAX_DELAY);
+
+}
